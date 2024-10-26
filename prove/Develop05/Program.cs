@@ -2,128 +2,119 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 
-abstract class Activity
+public class Program
 {
-    protected string Name { get; }
-    protected string Description { get; }
-    protected int Duration { get; private set; }
-
-    protected Activity(string name, string description)
+    public static void Main(string[] args)
     {
-        Name = name;
-        Description = description;
+        // Example of running the activities.
+        BreathingActivity breathing = new BreathingActivity();
+        breathing.SetDuration(30); // Set duration in seconds
+        breathing.PerformActivity();
+
+        ListingActivity listing = new ListingActivity();
+        listing.SetDuration(30); // Set duration in seconds
+        listing.PerformActivity();
+
+        ReflectionActivity reflection = new ReflectionActivity();
+        reflection.SetDuration(30); // Set duration in seconds
+        reflection.PerformActivity();
+    }
+}
+
+// Base Activity class
+public class Activity
+{
+    protected string _activityName;
+    protected string _description;
+    protected int _duration;
+
+    public void SetActivityName(string name)
+    {
+        _activityName = name;
     }
 
-    public void SetDuration()
+    public void SetDescription(string description)
     {
-        Console.Write("Enter the duration of the activity in seconds: ");
-        Duration = int.Parse(Console.ReadLine());
+        _description = description;
     }
 
-    public void StartMessage()
+    public void SetDuration(int duration)
     {
-        Console.WriteLine($"\nStarting {Name}.");
-        Console.WriteLine(Description);
-        SetDuration();
-        Console.WriteLine("Get ready to begin...");
-        Pause(3);
+        _duration = duration;
     }
 
-    public void EndMessage()
+    public virtual void PerformActivity()
     {
-        Console.WriteLine("Good job!");
-        Pause(3);
-        Console.WriteLine($"You completed the {Name} for {Duration} seconds.");
-        Pause(3);
+        // This method will be overridden by the derived classes.
     }
 
-    protected void Pause(int seconds)
+    public void ShowStartingMessage()
+    {
+        Console.WriteLine($"\nStarting {_activityName}");
+        Console.WriteLine(_description);
+        Console.WriteLine($"Duration: {_duration} seconds");
+    }
+
+    public void ShowEndingMessage()
+    {
+        Console.WriteLine($"\nYou have completed the {_activityName}. Well done!");
+    }
+
+    // Show a spinner to indicate time passing (simple loading effect)
+    public void ShowSpinner(int seconds)
     {
         for (int i = 0; i < seconds; i++)
         {
-            Console.Write(".", Console.CursorLeft);
-            Thread.Sleep(1000);
+            Console.Write("/");
+            Thread.Sleep(250);
+            Console.Write("\b");
+            Console.Write("-");
+            Thread.Sleep(250);
+            Console.Write("\b");
+            Console.Write("\\");
+            Thread.Sleep(250);
+            Console.Write("\b");
+            Console.Write("|");
+            Thread.Sleep(250);
+            Console.Write("\b");
         }
-        Console.WriteLine(); // New line after dots
     }
-
-    public abstract void Start();
 }
 
-class PushUpsActivity : Activity
+// Breathing Activity class
+public class BreathingActivity : Activity
 {
-    public PushUpsActivity() 
-        : base("Push-Ups Activity", "This activity will help you improve your strength through a series of push-ups.")
+    public BreathingActivity()
     {
+        SetActivityName("Breathing Activity");
+        SetDescription("This activity will help you relax by guiding you through slow breathing.");
     }
 
-    public override void Start()
+    public override void PerformActivity()
     {
-        StartMessage();
-        int endTime = (int)DateTime.Now.AddSeconds(Duration).Ticks;
+        // Show starting message
+        ShowStartingMessage();
 
-        while (DateTime.Now.Ticks < endTime)
+        // Perform breathing exercises for the specified duration
+        DateTime endTime = DateTime.Now.AddSeconds(_duration);
+        while (DateTime.Now < endTime)
         {
-            Console.WriteLine("Performing a push-up...");
-            Pause(2); // Pause for 2 seconds to simulate doing a push-up
+            Console.WriteLine("\nBreathe in...");
+            ShowSpinner(4); // Breathe in for 4 seconds
+
+            Console.WriteLine("Breathe out...");
+            ShowSpinner(4); // Breathe out for 4 seconds
         }
 
-        EndMessage();
+        // Show ending message
+        ShowEndingMessage();
     }
 }
 
-class ReflectionActivity : Activity
+// Listing Activity class
+public class ListingActivity : Activity
 {
-    private readonly List<string> prompts = new List<string>
-    {
-        "Think of a time when you stood up for someone else.",
-        "Think of a time when you did something really difficult.",
-        "Think of a time when you helped someone in need.",
-        "Think of a time when you did something truly selfless."
-    };
-
-    private readonly List<string> questions = new List<string>
-    {
-        "Why was this experience meaningful to you?",
-        "Have you ever done anything like this before?",
-        "How did you get started?",
-        "How did you feel when it was complete?",
-        "What made this time different than other times when you were not as successful?",
-        "What is your favorite thing about this experience?",
-        "What could you learn from this experience that applies to other situations?",
-        "What did you learn about yourself through this experience?",
-        "How can you keep this experience in mind in the future?"
-    };
-
-    public ReflectionActivity() 
-        : base("Reflection Activity", "This activity will help you reflect on times in your life when you have shown strength and resilience.")
-    {
-    }
-
-    public override void Start()
-    {
-        StartMessage();
-        Random rand = new Random();
-        string selectedPrompt = prompts[rand.Next(prompts.Count)];
-        Console.WriteLine(selectedPrompt);
-        Pause(5);
-
-        int endTime = (int)DateTime.Now.AddSeconds(Duration).Ticks;
-
-        while (DateTime.Now.Ticks < endTime)
-        {
-            string question = questions[rand.Next(questions.Count)];
-            Console.WriteLine(question);
-            Pause(5);
-        }
-
-        EndMessage();
-    }
-}
-
-class ListingActivity : Activity
-{
-    private readonly List<string> prompts = new List<string>
+    private List<string> _prompts = new List<string>
     {
         "Who are people that you appreciate?",
         "What are personal strengths of yours?",
@@ -132,68 +123,103 @@ class ListingActivity : Activity
         "Who are some of your personal heroes?"
     };
 
-    public ListingActivity() 
-        : base("Listing Activity", "This activity will help you reflect on the good things in your life by having you list as many things as you can in a certain area.")
+    public ListingActivity()
     {
+        SetActivityName("Listing Activity");
+        SetDescription("This activity will help you reflect on the good things in your life by having you list as many things as you can in a certain area.");
     }
 
-    public override void Start()
+    public override void PerformActivity()
     {
-        StartMessage();
-        Random rand = new Random();
-        string selectedPrompt = prompts[rand.Next(prompts.Count)];
-        Console.WriteLine(selectedPrompt);
-        Pause(5);
+        // Show starting message
+        ShowStartingMessage();
 
-        List<string> items = new List<string>();
-        int endTime = (int)DateTime.Now.AddSeconds(Duration).Ticks;
+        // Select a random prompt from the list
+        Random random = new Random();
+        string prompt = _prompts[random.Next(_prompts.Count)];
+        Console.WriteLine($"\nPrompt: {prompt}");
+        Console.WriteLine("You have a few seconds to start thinking...");
 
-        while (DateTime.Now.Ticks < endTime)
+        // Delay before starting to allow the user to prepare
+        ShowSpinner(5);
+
+        // Start the user input phase
+        Console.WriteLine("\nStart listing as many things as you can:");
+        List<string> userResponses = new List<string>();
+
+        DateTime endTime = DateTime.Now.AddSeconds(_duration);
+        while (DateTime.Now < endTime)
         {
-            Console.Write("List an item (type 'done' to finish): ");
-            string item = Console.ReadLine();
-            if (item.ToLower() == "done") break;
-            items.Add(item);
+            string response = Console.ReadLine();
+            if (!string.IsNullOrEmpty(response))
+            {
+                userResponses.Add(response);
+            }
         }
 
-        Console.WriteLine($"You listed {items.Count} items.");
-        EndMessage();
+        // Display how many items they listed
+        Console.WriteLine($"\nYou listed {userResponses.Count} items.");
+
+        // Show ending message
+        ShowEndingMessage();
     }
 }
 
-class Program
+// Reflection Activity class
+public class ReflectionActivity : Activity
 {
-    static void Main(string[] args)
+    private List<string> _prompts = new List<string>
     {
-        Dictionary<string, Activity> activities = new Dictionary<string, Activity>
-        {
-            { "1", new PushUpsActivity() },
-            { "2", new ReflectionActivity() },
-            { "3", new ListingActivity() }
-        };
+        "Think of a time when you stood up for someone else.",
+        "Think of a time when you did something really difficult.",
+        "Think of a time when you helped someone in need.",
+        "Think of a time when you did something truly selfless."
+    };
 
-        while (true)
-        {
-            Console.WriteLine("\nChoose an activity:");
-            Console.WriteLine("1. Push-Ups Activity");
-            Console.WriteLine("2. Reflection Activity");
-            Console.WriteLine("3. Listing Activity");
-            Console.WriteLine("4. Exit");
+    private List<string> _questions = new List<string>
+    {
+        "Why was this experience meaningful to you?",
+        "Have you ever done anything like this before?",
+        "How did you get started?",
+        "How did you feel when it was complete?",
+        "What made this time different than other times?",
+        "What is your favorite thing about this experience?",
+        "What could you learn from this experience?",
+        "What did you learn about yourself?",
+        "How can you keep this experience in mind in the future?"
+    };
 
-            string choice = Console.ReadLine();
-            if (activities.ContainsKey(choice))
-            {
-                activities[choice].Start();
-            }
-            else if (choice == "4")
-            {
-                Console.WriteLine("Exiting the program.");
-                break;
-            }
-            else
-            {
-                Console.WriteLine("Invalid choice. Please try again.");
-            }
+    public ReflectionActivity()
+    {
+        SetActivityName("Reflection Activity");
+        SetDescription("This activity will help you reflect on times in your life when you have shown strength and resilience.");
+    }
+
+    public override void PerformActivity()
+    {
+        // Show starting message
+        ShowStartingMessage();
+
+        // Select a random reflection prompt from the list
+        Random random = new Random();
+        string prompt = _prompts[random.Next(_prompts.Count)];
+        Console.WriteLine($"\nPrompt: {prompt}");
+
+        // Pause for a few seconds before showing questions
+        ShowSpinner(5);
+
+        // Start showing questions and allow time for reflection
+        DateTime endTime = DateTime.Now.AddSeconds(_duration);
+        while (DateTime.Now < endTime)
+        {
+            string question = _questions[random.Next(_questions.Count)];
+            Console.WriteLine($"\n{question}");
+
+            // Pause for reflection
+            ShowSpinner(5);
         }
+
+        // Show ending message
+        ShowEndingMessage();
     }
 }

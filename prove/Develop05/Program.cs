@@ -144,7 +144,7 @@ public class ListingActivity : Activity
         ShowSpinner(5);
 
         // Start the user input phase
-        Console.WriteLine("\nStart listing as many things as you can:");
+        Console.WriteLine("\nStart listing as many things as you can (type 'done' to finish early):");
         List<string> userResponses = new List<string>();
 
         DateTime endTime = DateTime.Now.AddSeconds(_duration);
@@ -153,7 +153,9 @@ public class ListingActivity : Activity
             string response = Console.ReadLine();
             if (!string.IsNullOrEmpty(response))
             {
+                if (response.ToLower() == "done") break; // Allow user to finish early
                 userResponses.Add(response);
+                Console.WriteLine($"• {response}"); // Display bullet point for each response
             }
         }
 
